@@ -35,6 +35,12 @@
 #include "driver/gptimer.h"
 #include "driver/i2s_std.h"
 #include "player.h"
+#include "cr2_trace.h"
+#include "cr2_bench.h"
+#include "cr2_block_writer.h"
+#include "cr2_sync_probe.h"
+#include "cr2_dma_probe.h"
+#include "cr2_wait_policy.h"
 #include "snapcast.h"
 
 #define USE_SAMPLE_INSERTION CONFIG_USE_SAMPLE_INSERTION
@@ -137,12 +143,30 @@ static int64_t MIN(int64_t x, int64_t y) {
 /**
  *
  */
+static esp_err_t cr2_i2s_write(i2s_chan_handle_t h, const void *data,
+                              size_t size, size_t *written, uint32_t timeout) {
+  *written = 0;
+  esp_err_t result = cr2_block_transfer(h, data, size, written, timeout, false);
+  if (result == ESP_OK && *written) cr2_audio_written();
+  if (*written) cr2_sync_written(data, *written);
+  return result;
+}
+
+static esp_err_t cr2_i2s_preload(i2s_chan_handle_t h, const void *data,
+                                size_t size, size_t *written) {
+  return cr2_block_transfer(h, data, size, written, 0, true);
+}
+
 esp_err_t my_i2s_channel_disable(i2s_chan_handle_t handle) {
+  cr2_audio_clock(false);
+  cr2_sync_discontinuity();
   if (tx_chan != NULL) {
     if (i2sEnabled == true) {
       i2sEnabled = false;
 
-      return i2s_channel_disable(handle);
+      esp_err_t result = i2s_channel_disable(handle);
+      cr2_dma_probe_stop();
+      return result;
     }
   }
 
@@ -157,7 +181,11 @@ esp_err_t my_i2s_channel_enable(i2s_chan_handle_t handle) {
     if (i2sEnabled == false) {
       i2sEnabled = true;
 
-      return i2s_channel_enable(handle);
+      cr2_dma_probe_start();
+      esp_err_t result = i2s_channel_enable(handle);
+      if (result != ESP_OK) cr2_dma_probe_stop();
+      cr2_audio_clock(result == ESP_OK);
+      return result;
     }
   }
 
@@ -194,7 +222,7 @@ static void ensure_noiseless(i2s_chan_handle_t tx) {
 
     // Write silence
     // While this is not required to stop noise, it somehow prevents pops later.
-    i2s_channel_write(tx, silence_buf, silence_size, &bytes_written,
+    cr2_i2s_write(tx, silence_buf, silence_size, &bytes_written,
                       pdMS_TO_TICKS(200));
 
     // Wait for DMA to flush
@@ -339,7 +367,9 @@ static esp_err_t player_setup_i2s(snapcastSetting_t *setting) {
       .gpio_cfg = pin_config0,
   };
 
+  cr2_audio_format(sr, bits, setting->ch);
   ESP_ERROR_CHECK(i2s_channel_init_std_mode(tx_chan, &tx_std_cfg));
+  cr2_dma_probe_attach(tx_chan, sr, bits, setting->ch);
   // This prevents pops/clicks on some I2S codecs
   ensure_noiseless(tx_chan);
 
@@ -1662,7 +1692,7 @@ static void player_task(void *pvParameters) {
             size = fragment->size;
 
             ESP_ERROR_CHECK(
-                i2s_channel_preload_data(tx_chan, p_payload, size, &written));
+                cr2_i2s_preload(tx_chan, p_payload, size, &written));
 
             // check if DMA is full at first try here
             if (written != size) {
@@ -1724,6 +1754,7 @@ static void player_task(void *pvParameters) {
           vTaskDelay(pdMS_TO_TICKS(2));
           audio_set_mute(scSet.muted);
 
+          cr2_trace(5, age, diff2Server, chunkStart, 0);
           ESP_LOGI(TAG, "initial sync age: %lldus, chunk duration: %lldus", age,
                    chunkDuration_us);
 
@@ -1743,6 +1774,8 @@ static void player_task(void *pvParameters) {
           
           int msgWaiting = uxQueueMessagesWaiting(pcmChkQHdl);
 
+          cr2_audio_resync(1);
+          cr2_trace(3, age, diff2Server, chunkStart, msgWaiting);
           ESP_LOGW(TAG,
                    "RESYNCING HARD 1: age %lldus, latency %lldus, free %d, "
                    "largest block %d, rssi: %d, left in queue %d",
@@ -1801,7 +1834,7 @@ static void player_task(void *pvParameters) {
                 dir_insert_sample = 0;
               }
 #endif             
-              i2s_channel_write(tx_chan, p_payload, size, &written, portMAX_DELAY);
+              cr2_i2s_write(tx_chan, p_payload, size, &written, portMAX_DELAY);
               
               samples_written += (written / framesToBytes);
               size -= written;
@@ -1810,7 +1843,7 @@ static void player_task(void *pvParameters) {
 
 #if USE_SAMPLE_INSERTION
               if (dir_insert_sample < 0) {
-                if (i2s_channel_write(tx_chan, p_payload - sampleSizeInBytes, sampleSizeInBytes, &written, portMAX_DELAY) != ESP_OK) {
+                if (cr2_i2s_write(tx_chan, p_payload - sampleSizeInBytes, sampleSizeInBytes, &written, portMAX_DELAY) != ESP_OK) {
                   ESP_LOGE(TAG, "i2s_playback_task:  I2S write error %d", 1);
                 }
                 else {
@@ -1865,7 +1898,7 @@ static void player_task(void *pvParameters) {
               if (size >= tmpSize) {
                 i2sWriteLen = i2sDmaBufMaxLen * framesToBytes - alreadyWritten;
 
-                i2s_channel_write(tx_chan, p_payload, i2sWriteLen, &written,
+                cr2_i2s_write(tx_chan, p_payload, i2sWriteLen, &written,
                                   portMAX_DELAY);
 
                 alreadyWrittenTime_us =
@@ -1885,7 +1918,7 @@ static void player_task(void *pvParameters) {
 
                 if (i2sWriteLen + sampleSizeInBytes <= i2sDmaBufMaxLen) {
                   if (dir_insert_sample < 0) {
-                    if (i2s_channel_write(tx_chan, p_payload, sampleSizeInBytes,
+                    if (cr2_i2s_write(tx_chan, p_payload, sampleSizeInBytes,
                                           &insertedSamplesWritten,
                                           portMAX_DELAY) != ESP_OK) {
                       ESP_LOGE(TAG, "i2s_playback_task:  I2S write error %d",
@@ -1897,7 +1930,7 @@ static void player_task(void *pvParameters) {
                 }
 #endif
 
-                i2s_channel_write(tx_chan, p_payload, i2sWriteLen, &written,
+                cr2_i2s_write(tx_chan, p_payload, i2sWriteLen, &written,
                                   portMAX_DELAY);
 
 #if USE_SAMPLE_INSERTION
@@ -1949,7 +1982,7 @@ static void player_task(void *pvParameters) {
           memset(tmpBuf, 0, sizeof(tmpBuf));
 
           do {
-            if (i2s_channel_write(tx_chan, tmpBuf, write_size, &written,
+            if (cr2_i2s_write(tx_chan, tmpBuf, write_size, &written,
                                   portMAX_DELAY) != ESP_OK) {
               ESP_LOGE(TAG, "i2s_playback_task: I2S write error %d/%d", written,
                        size);
@@ -1998,6 +2031,30 @@ static void player_task(void *pvParameters) {
 
           int msgWaiting = uxQueueMessagesWaiting(pcmChkQHdl);
 
+          // A software queue can be empty while DMA still holds audio.
+          // Do not defer a genuine clock-error resync, or wait on unknown DMA.
+          if (msgWaiting == 0) {
+            bool clock_error = MEDIANFILTER_isFull(&shortMedianFilter, 0) &&
+                ((shortMedian > hardResyncThreshold) ||
+                 (shortMedian < -hardResyncThreshold));
+            int64_t remaining_us = -1;
+            uint32_t budget_us = cr2_dma_probe_wait_budget(clock_error, &remaining_us);
+            TickType_t ticks = (uint64_t)budget_us * configTICK_RATE_HZ / 1000000;
+            if (ticks) {
+              pcm_chunk_message_t *pending = NULL;
+              int64_t wait_started = esp_timer_get_time();
+              cr2_trace(15, remaining_us, budget_us, wait_started, ticks);
+              BaseType_t ready = xQueuePeek(pcmChkQHdl, &pending, ticks);
+              int64_t remaining_after = -1;
+              uint32_t after_budget = cr2_dma_probe_wait_budget(clock_error, &remaining_after);
+              int64_t elapsed = esp_timer_get_time() - wait_started;
+              bool keep_clock = cr2_wait_accept(budget_us, elapsed,
+                                                ready == pdPASS, after_budget);
+              if (keep_clock) msgWaiting = uxQueueMessagesWaiting(pcmChkQHdl);
+              cr2_trace(16, elapsed, remaining_after, after_budget, msgWaiting);
+            }
+          }
+
           // resync hard if we are getting very late / early.
           // rest gets tuned in through apll speed control or sample insertion
           if ((msgWaiting == 0) ||
@@ -2005,6 +2062,7 @@ static void player_task(void *pvParameters) {
                ((shortMedian > hardResyncThreshold) ||
                 (shortMedian < -hardResyncThreshold)))) 
           {
+            cr2_dma_probe_snapshot(msgWaiting);
             if (chnk != NULL) {
               free_pcm_chunk(chnk);
               chnk = NULL;
@@ -2013,6 +2071,8 @@ static void player_task(void *pvParameters) {
             wifi_ap_record_t ap;
             esp_wifi_sta_get_ap_info(&ap);
 
+            cr2_audio_resync(2);
+          cr2_trace(4, age, diff2Server, chunkStart, msgWaiting);
             ESP_LOGW(TAG,
                      "RESYNCING HARD 2: age %lldus, latency %lldus, free "
                      "%d, largest block %d, %d, rssi: %d",
@@ -2039,15 +2099,15 @@ static void player_task(void *pvParameters) {
               (MEDIANFILTER_isFull(&shortMedianFilter, 0))) {
             if ((shortMedian < -shortOffset) && (miniMedian < -miniOffset) &&
                 (age < -miniOffset)) {  // we are early
-              dir = -1;
-              dir_insert_sample = -1;
-              insertedSamplesCounter += INSERT_SAMPLES;
+              dir = cr2_sync_decision(-1, age, shortMedian, miniMedian);
+              dir_insert_sample = dir;
+              if (dir) insertedSamplesCounter += INSERT_SAMPLES;
             } else if ((shortMedian > shortOffset) &&
                        (miniMedian > miniOffset) &&
                        (age > miniOffset)) {  // we are late
-              dir = 1;
-              dir_insert_sample = 1;
-              insertedSamplesCounter -= INSERT_SAMPLES;
+              dir = cr2_sync_decision(1, age, shortMedian, miniMedian);
+              dir_insert_sample = dir;
+              if (dir) insertedSamplesCounter -= INSERT_SAMPLES;
             }
           }
 #else  // use APLL to adjust sync

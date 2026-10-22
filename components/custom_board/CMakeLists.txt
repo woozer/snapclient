@@ -1,6 +1,6 @@
 # Edit following two lines to set component requirements (see docs)
-set(COMPONENT_REQUIRES audio_hal audio_board)
-set(COMPONENT_PRIV_REQUIRES esp_peripherals)
+set(COMPONENT_REQUIRES audio_hal audio_board esp_http_server app_update esp_app_format json esp_http_client settings_manager)
+set(COMPONENT_PRIV_REQUIRES esp_peripherals esp_psram esp_wifi driver esp_http_server esp_timer)
 
 if(CONFIG_AUDIO_BOARD_CUSTOM)
   message(STATUS "Current board name is " CONFIG_AUDIO_BOARD_CUSTOM)
@@ -9,6 +9,11 @@ if(CONFIG_AUDIO_BOARD_CUSTOM)
 	./generic_board/board.c
 	./generic_board/board_pins_config.c
 	)
+
+  if(CONFIG_DAC_CR2_BENCH)
+    list(APPEND COMPONENT_ADD_INCLUDEDIRS ./cr2_bench)
+    list(APPEND COMPONENT_SRCS ./cr2_bench/cr2_bench.c ./cr2_bench/cr2_trace.c ./cr2_bench/cr2_ota.c ./cr2_bench/cr2_music.c ./cr2_bench/cr2_sync_probe.c ./cr2_bench/cr2_dma_probe.c)
+  endif()
 
   if (CONFIG_DAC_ADAU1961)
     message(STATUS "Selected DAC is " CONFIG_DAC_ADAU1961)

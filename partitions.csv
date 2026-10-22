@@ -1,6 +1,9 @@
-# Name, 	Type, 	SubType, 	Offset, 	Size, Flags
-nvs,		data,	nvs,		,	80K,
-otadata,	data,	ota,		,	8K,
-phy_init,	data,	phy,		,	4K,
-ota_0,		app,	ota_0,		,	1984K,
-ota_1,		app,	ota_1,		,	1984K,
+# Preserve diagnostic NVS at its original address; new firmware uses its own NVS.
+# Name,Type,SubType,Offset,Size,Flags
+diag_nvs,data,nvs,0x9000,0x5000,
+otadata,data,ota,0xe000,0x2000,
+ota_0,app,ota_0,0x10000,0x280000,
+ota_1,app,ota_1,0x290000,0x280000,
+nvs,data,nvs,0x510000,0x10000,
+phy_init,data,phy,0x520000,0x1000,
+coredump,data,coredump,0x530000,0x10000,

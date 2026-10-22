@@ -149,3 +149,14 @@ local.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,eclipse
 .vscode-ctags
+
+# Per-installation credentials and local diagnostic data
+components/custom_board/cr2_bench/*_secret.h
+.local/
+*.pcap
+*.pcapng
+*.bin
+__pycache__/
+
+# Local source-validation input, not part of the portable export.
+/cr2-source-manifest.json

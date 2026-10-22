@@ -1,0 +1,188 @@
+{
+  "upstream_commit": "f13a7e437824ab7ef7bd4bfe482fcfeea8e74dbd",
+  "source_version": "c-r2-play-0.2.20-wait",
+  "exported_files": {
+    "CMakeLists.txt": {
+      "source_sha256": "21d29708ae698554c315fd57c118715d400dc095544dd5908bde8fed837fccfa",
+      "public_sha256": "21d29708ae698554c315fd57c118715d400dc095544dd5908bde8fed837fccfa",
+      "sanitized": false
+    },
+    "components/audio_board/Kconfig.projbuild": {
+      "source_sha256": "7818afb1e8b1061ff5c747426375b3c262b5fba86309df03393dade35630f21b",
+      "public_sha256": "7818afb1e8b1061ff5c747426375b3c262b5fba86309df03393dade35630f21b",
+      "sanitized": false
+    },
+    "components/custom_board/CMakeLists.txt": {
+      "source_sha256": "bdd4fa83ad9a48329814d323a9d9c0811e81085af1297a6f77e58cf88092831e",
+      "public_sha256": "bdd4fa83ad9a48329814d323a9d9c0811e81085af1297a6f77e58cf88092831e",
+      "sanitized": false
+    },
+    "components/custom_board/generic_board/board.c": {
+      "source_sha256": "da24ef717edf45cccf1f394722ffbe364e19d8fa3c5b25d21939ee09e2cc71cd",
+      "public_sha256": "da24ef717edf45cccf1f394722ffbe364e19d8fa3c5b25d21939ee09e2cc71cd",
+      "sanitized": false
+    },
+    "components/custom_board/generic_board/include/board_def.h": {
+      "source_sha256": "a24619520460ed01fe6d804dfb4fe265e5518662b03adb51d8fd1e74c34dac99",
+      "public_sha256": "a24619520460ed01fe6d804dfb4fe265e5518662b03adb51d8fd1e74c34dac99",
+      "sanitized": false
+    },
+    "components/improv_wifi/improvWifi.cpp": {
+      "source_sha256": "98e51321d26974d82995a0f9dee201719a8bbe909967e5db630f1d0bc0bd604d",
+      "public_sha256": "98e51321d26974d82995a0f9dee201719a8bbe909967e5db630f1d0bc0bd604d",
+      "sanitized": false
+    },
+    "components/improv_wifi/wifi_provisioning.c": {
+      "source_sha256": "44a873a86b15659129af90f50c3275fe11196e1dbf372816c65285f4c5028a27",
+      "public_sha256": "44a873a86b15659129af90f50c3275fe11196e1dbf372816c65285f4c5028a27",
+      "sanitized": false
+    },
+    "components/lightsnapcast/CMakeLists.txt": {
+      "source_sha256": "f6289e2f9c0a8cd412c35c5a83f0774694baac25d95f42b9a06609cbe29a7ba3",
+      "public_sha256": "f6289e2f9c0a8cd412c35c5a83f0774694baac25d95f42b9a06609cbe29a7ba3",
+      "sanitized": false
+    },
+    "components/lightsnapcast/player.c": {
+      "source_sha256": "b99ff252c984757afc593ddb5e17561eb8dc721e9b42f2ffc458054d14ae5243",
+      "public_sha256": "b99ff252c984757afc593ddb5e17561eb8dc721e9b42f2ffc458054d14ae5243",
+      "sanitized": false
+    },
+    "components/network_interface/wifi_interface.c": {
+      "source_sha256": "60dcdc1b0e8f0bd6b57ded19db413ee84cd244afc17584c828594bb95b039fc9",
+      "public_sha256": "60dcdc1b0e8f0bd6b57ded19db413ee84cd244afc17584c828594bb95b039fc9",
+      "sanitized": false
+    },
+    "components/ui_http_server/ui_http_server.c": {
+      "source_sha256": "2be9949c04f497e60d27dbdd520fc6a6472d293c388873d11f4f81fb2ebd2de9",
+      "public_sha256": "2be9949c04f497e60d27dbdd520fc6a6472d293c388873d11f4f81fb2ebd2de9",
+      "sanitized": false
+    },
+    "main/connection_handler.c": {
+      "source_sha256": "397f06911b4596125ad138a201116d3b1c70f422104a6a957fee321b9fede1dc",
+      "public_sha256": "397f06911b4596125ad138a201116d3b1c70f422104a6a957fee321b9fede1dc",
+      "sanitized": false
+    },
+    "main/main.c": {
+      "source_sha256": "335e1f4040fb5801680c29a5d605f139ceb2eb1eb90a903daf9a2b9c1bc86bda",
+      "public_sha256": "335e1f4040fb5801680c29a5d605f139ceb2eb1eb90a903daf9a2b9c1bc86bda",
+      "sanitized": false
+    },
+    "partitions.csv": {
+      "source_sha256": "52d8fcb1f6ea3b02c513e3420eda9ceb9ec795613159f8d26b696f538f1c565f",
+      "public_sha256": "52d8fcb1f6ea3b02c513e3420eda9ceb9ec795613159f8d26b696f538f1c565f",
+      "sanitized": false
+    },
+    "sdkconfig.defaults": {
+      "source_sha256": "964575ba9e9c827bac4482a7a22d547ed2515d0b8d77d404f3bc968a8b118324",
+      "public_sha256": "5b19835b196a7feb01b2f9c2ab67b66a957101410d178c38eb7e5a5df44429fc",
+      "sanitized": true
+    },
+    "components/custom_board/cr2_bench/cr2_wait_policy.h": {
+      "source_sha256": "1f310840d70a32f707939373bbdabface9e10cd50c3740781ed6fdb58c4c60d1",
+      "public_sha256": "1f310840d70a32f707939373bbdabface9e10cd50c3740781ed6fdb58c4c60d1",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_inventory.h": {
+      "source_sha256": "56db279706a177ac1b24770caef0d6fe4c2fb67e9c3633729e4f6982923c1e33",
+      "public_sha256": "56db279706a177ac1b24770caef0d6fe4c2fb67e9c3633729e4f6982923c1e33",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_dma_probe.h": {
+      "source_sha256": "77c0be57e51e4411674e5f3a15fc3db5a24d28ad1aebea33f532fc7ed2077b51",
+      "public_sha256": "77c0be57e51e4411674e5f3a15fc3db5a24d28ad1aebea33f532fc7ed2077b51",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_bench.c": {
+      "source_sha256": "c82c3c986a74741f90d3185a2d3e1d308b907bd6426c68fc866068414c0d5441",
+      "public_sha256": "c82c3c986a74741f90d3185a2d3e1d308b907bd6426c68fc866068414c0d5441",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_dma_core.h": {
+      "source_sha256": "4f43442fb4b8e2c944c5d96957d954c5c61a0e49039441541784e4e9410872d2",
+      "public_sha256": "4f43442fb4b8e2c944c5d96957d954c5c61a0e49039441541784e4e9410872d2",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_sync_probe.c": {
+      "source_sha256": "9db15cdd0947b7edb3c60268d4baed68477a4894b2bb468970eb2c1c1c21a98a",
+      "public_sha256": "9db15cdd0947b7edb3c60268d4baed68477a4894b2bb468970eb2c1c1c21a98a",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_ota.h": {
+      "source_sha256": "2ad117226861e6eb6cb16e745c401d0ba5654d293c9290b995e3404a819d2325",
+      "public_sha256": "2ad117226861e6eb6cb16e745c401d0ba5654d293c9290b995e3404a819d2325",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_music.c": {
+      "source_sha256": "6c4c741e7238ab2f9118b7da47f19c45daa1978748b056e9851b87850e6ed596",
+      "public_sha256": "6c4c741e7238ab2f9118b7da47f19c45daa1978748b056e9851b87850e6ed596",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_trace.h": {
+      "source_sha256": "fd559c2ad8619461dfa12490e93001b02f7b416625fc28770f9000bcd2454d10",
+      "public_sha256": "fd559c2ad8619461dfa12490e93001b02f7b416625fc28770f9000bcd2454d10",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_power_policy.h": {
+      "source_sha256": "1492a48da7a8620c74d5f0c62ba40267062a49073b421d8416e9a87b833dad56",
+      "public_sha256": "1492a48da7a8620c74d5f0c62ba40267062a49073b421d8416e9a87b833dad56",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_web_assets.h": {
+      "source_sha256": "6614d3d3009d60a784c96915c4217ad1a383647bcad3669b0f9cc5070b1d66cc",
+      "public_sha256": "6614d3d3009d60a784c96915c4217ad1a383647bcad3669b0f9cc5070b1d66cc",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_sync_core.h": {
+      "source_sha256": "17722f26923c8d122178eea8eb60af8e5ead6fc26ac040d901b05b5df2e7e6d2",
+      "public_sha256": "17722f26923c8d122178eea8eb60af8e5ead6fc26ac040d901b05b5df2e7e6d2",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_bench.h": {
+      "source_sha256": "9b0350cbb24768bf459564922078247e8fc8621f0e369d5ff9630cd650fe92d3",
+      "public_sha256": "9b0350cbb24768bf459564922078247e8fc8621f0e369d5ff9630cd650fe92d3",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_dma_probe.c": {
+      "source_sha256": "c345600b1414841df746cc4fb50d95ce39eb5e1b6a582168a3f13c967ae1a327",
+      "public_sha256": "c345600b1414841df746cc4fb50d95ce39eb5e1b6a582168a3f13c967ae1a327",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_dma.h": {
+      "source_sha256": "6c64f5c0c5724fd329dff9092a5018cab7095e0fc9b15030fbd7a61d8dbee6a3",
+      "public_sha256": "6c64f5c0c5724fd329dff9092a5018cab7095e0fc9b15030fbd7a61d8dbee6a3",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_block_writer.h": {
+      "source_sha256": "1fc5adb1a04f99a1ca306d6b011958d0e9be98afde60416b78034fa69989340b",
+      "public_sha256": "1fc5adb1a04f99a1ca306d6b011958d0e9be98afde60416b78034fa69989340b",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_ota.c": {
+      "source_sha256": "995290e54d97e15ce4d482511f22fab7c2dd4f46a42d345b85cc7afe55bf5d3e",
+      "public_sha256": "995290e54d97e15ce4d482511f22fab7c2dd4f46a42d345b85cc7afe55bf5d3e",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_sync_probe.h": {
+      "source_sha256": "2208233b96639c598d528eece4c6b7693817760b72b6e375123752ef0086fc7a",
+      "public_sha256": "2208233b96639c598d528eece4c6b7693817760b72b6e375123752ef0086fc7a",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_trace.c": {
+      "source_sha256": "01fe00d4a0f85f92305c0b5775a2375b8e296f948876c59863ce39dca1895218",
+      "public_sha256": "01fe00d4a0f85f92305c0b5775a2375b8e296f948876c59863ce39dca1895218",
+      "sanitized": false
+    },
+    "components/custom_board/cr2_bench/cr2_music.h": {
+      "source_sha256": "0ffbc008eeefeb9eceaeff59256b82a237a157308872de923260c91ad666b0ef",
+      "public_sha256": "0ffbc008eeefeb9eceaeff59256b82a237a157308872de923260c91ad666b0ef",
+      "sanitized": false
+    }
+  },
+  "excluded": [
+    "private OTA/music headers",
+    "sdkconfig",
+    "build artifacts",
+    "raw captures and logs",
+    "local source manifests"
+  ]
+}

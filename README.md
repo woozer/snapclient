@@ -1,3 +1,5 @@
+C-R2 port: see [README.CR2.md](README.CR2.md) for our board, branches and build instructions.
+
 # Snapcast client for ESP32
 
 ### Synchronous Multiroom audio streaming client for [Snapcast](https://github.com/badaix/snapcast) ported to ESP32

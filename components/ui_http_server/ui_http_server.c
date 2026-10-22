@@ -9,6 +9,8 @@
 */
 
 #include "ui_http_server.h"
+#include "cr2_trace.h"
+#include "cr2_bench.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -104,30 +106,26 @@ static void url_decode(char *dst, const char *src, size_t dst_size) {
 /**
  * Find key value in parameter string
  */
-static int find_key_value(char *key, char *parameter, char *value) {
-	ESP_LOGD(TAG, "%s: key=%s", __func__, key);
-	// char * addr1;
-	char *addr1 = strstr(parameter, key);
-	if (addr1 == NULL)
-		return 0;
-	ESP_LOGD(TAG, "%s: addr1=%s", __func__, addr1);
-
-	char *addr2 = addr1 + strlen(key);
-	ESP_LOGD(TAG, "%s: addr2=[%s]", __func__, addr2);
-
-	char *addr3 = strstr(addr2, "&");
-	ESP_LOGD(TAG, "%s: addr3=%p", __func__, addr3);
-	if (addr3 == NULL) {
-		strcpy(value, addr2);
-	} else {
-		int length = addr3 - addr2;
-		ESP_LOGD(TAG, "%s: addr2=%p addr3=%p length=%d", __func__, addr2, addr3,
-				 length);
-		strncpy(value, addr2, length);
-		value[length] = 0;
-	}
-	ESP_LOGD(TAG, "%s: key=[%s] value=[%s]", __func__, key, value);
-	return strlen(value);
+static int find_key_value(const char *key, const char *parameter,
+                          char *value, size_t capacity) {
+    const char *query = strchr(parameter, '?');
+    if (!query || !capacity) return 0;
+    value[0] = 0;
+    size_t key_length = strlen(key);
+    for (const char *field = query + 1; *field;) {
+        const char *end = strchr(field, '&');
+        size_t length = end ? (size_t)(end - field) : strlen(field);
+        if (length >= key_length && strncmp(field, key, key_length) == 0) {
+            length -= key_length;
+            if (length >= capacity) return 0;
+            memcpy(value, field + key_length, length);
+            value[length] = 0;
+            return (int)length;
+        }
+        if (!end) break;
+        field = end + 1;
+    }
+    return 0;
 }
 
 /**
@@ -167,15 +165,15 @@ static esp_err_t root_post_handler(httpd_req_t *req) {
 	ESP_LOGD(TAG, "%s: uri=%s", __func__, req->uri);
 	URL_t urlBuf;
 	int ret = -1;
-	char param[16] = {0};
+	char param[32] = {0};
 	char valstr[64] = {0}; // Increased size for hostname
 
 	set_cors_headers(req);
 
 	memset(&urlBuf, 0, sizeof(URL_t));
 
-	if (find_key_value("param=", (char *)req->uri, param) &&
-		find_key_value("value=", (char *)req->uri, valstr)) {
+	if (find_key_value("param=", req->uri, param, sizeof(param)) &&
+		find_key_value("value=", req->uri, valstr, sizeof(valstr))) {
 
 		// Special handling for hostname (string parameter)
 		if (strcmp(param, "hostname") == 0) {
@@ -281,7 +279,7 @@ static esp_err_t root_delete_handler(httpd_req_t *req) {
 
 	set_cors_headers(req);
 
-	if (!find_key_value("param=", (char *)req->uri, param)) {
+	if (!find_key_value("param=", req->uri, param, sizeof(param))) {
 		ESP_LOGD(TAG, "%s: Invalid delete: expected param=NAME in URI",
 				 __func__);
 		httpd_resp_set_status(req, "400 Bad Request");
@@ -356,11 +354,11 @@ static esp_err_t root_delete_handler(httpd_req_t *req) {
  */
 static esp_err_t get_param_handler(httpd_req_t *req) {
 	ESP_LOGD(TAG, "%s: uri=%s", __func__, req->uri);
-	char param[16] = {0};
+	char param[32] = {0};
 
 	set_cors_headers(req);
 
-	if (find_key_value("param=", (char *)req->uri, param)) {
+	if (find_key_value("param=", req->uri, param, sizeof(param))) {
 		// Special handling for hostname (string parameter)
 		if (strcmp(param, "hostname") == 0) {
 			char hostname[64] = {0};
@@ -516,7 +514,7 @@ static esp_err_t get_capabilities_handler(httpd_req_t *req) {
 
 	// Parse tab parameter
 	char tab[16] = {0};
-	if (!find_key_value("tab=", (char *)req->uri, tab)) {
+	if (!find_key_value("tab=", req->uri, tab, sizeof(tab))) {
 		// No tab specified, return error
 		ESP_LOGW(TAG, "%s: Missing 'tab' parameter", __func__);
 		httpd_resp_set_status(req, "400 Bad Request");
@@ -994,6 +992,7 @@ esp_err_t start_server(const char *base_path, int port) {
 	config.server_port = port;
 	config.max_open_sockets = 7;
 	config.max_uri_handlers = 64;
+	config.stack_size = 8192;
 	config.lru_purge_enable = true; // Enable LRU socket purging
 
 	/* Enable wildcard URI matching for static file handler */
@@ -1005,6 +1004,9 @@ esp_err_t start_server(const char *base_path, int port) {
 		ESP_LOGE(TAG, "%s: Failed to start file server!", __func__);
 		return ESP_FAIL;
 	}
+
+	cr2_trace_register_http(server);
+	cr2_audio_register_http(server);
 
 	/* URI handler for get */
 	httpd_uri_t _root_get_handler = {

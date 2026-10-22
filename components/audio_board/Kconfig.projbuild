@@ -83,7 +83,10 @@ menu "Audio Board"
 	        help
 	            Select a DAC connected to the generic ESP32 board
 
-	    config DAC_PCM51XX
+	    config DAC_CR2_BENCH
+            bool "C-R2 bounded TAS5825M playback bench"
+
+        config DAC_PCM51XX
 	        bool "TI PCM51XX/TAS57XX based DAC"
 
 	    config DAC_PCM5102A

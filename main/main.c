@@ -33,7 +33,9 @@
 #include "network_interface.h"
 #include "nvs_flash.h"
 
+#if CONFIG_ESP32_UDP_LOGGER_ENABLED
 #include "esp32_udp_logger.h"
+#endif
 
 // Web socket server
 // #include "websocket_if.h"
@@ -53,6 +55,8 @@
 // flac decoder is implemented as a subcomponet from master git repo
 #include "FLAC/stream_decoder.h"
 #include "connection_handler.h"
+#include "cr2_trace.h"
+#include "cr2_bench.h"
 #include "ota_server.h"
 #include "player.h"
 #include "settings_manager.h"
@@ -81,7 +85,7 @@ static void error_callback(const FLAC__StreamDecoder *decoder,
 
 static FLAC__StreamDecoder *flacDecoder = NULL;
 
-const char *VERSION_STRING = "0.0.4";
+const char *VERSION_STRING = "c-r2-play-0.2.20-wait";
 
 #define HTTP_TASK_PRIORITY 17
 #define HTTP_TASK_CORE_ID 1
@@ -193,7 +197,7 @@ void time_sync_msg_cb(void *args) {
   }
 
   rc1 = netconn_write(lwipNetconn, p_pkt, BASE_MESSAGE_SIZE + TIME_MESSAGE_SIZE,
-                      NETCONN_NOCOPY);
+                      NETCONN_COPY);
   
   if (rc1 != ERR_OK) {
     ESP_LOGW(TAG, "error writing timesync msg");
@@ -266,6 +270,7 @@ void time_sync_msg_received(base_message_t *base_message_rx,
 
   // store current time
   time_sync_data->lastTimeSync = time_sync_data->now;
+  cr2_trace(2, tmpDiffToServer, (tdif + ttx) / 2, trx, 0);
 
   if (received_codec_header == true) {
     // if (!esp_timer_is_active(time_sync_data->timeSyncMessageTimer)) {
@@ -550,11 +555,18 @@ void audio_set_volume(int volume) {
 void server_settings_msg_received(
     server_settings_message_t *server_settings_message,
     snapcastSetting_t *scSet) {
+  int ui_volume = server_settings_message->volume;
+  bool ui_muted = server_settings_message->muted;
+  cr2_audio_server_settings(&ui_volume, &ui_muted);
+  server_settings_message->volume = ui_volume;
+  server_settings_message->muted = ui_muted;
   // log mute state, buffer, latency
   ESP_LOGI(TAG, "Buffer length:  %ld", server_settings_message->buffer_ms);
   ESP_LOGI(TAG, "Latency:        %ld", server_settings_message->latency);
   ESP_LOGI(TAG, "Mute:           %d", server_settings_message->muted);
   ESP_LOGI(TAG, "Setting volume: %ld", server_settings_message->volume);
+
+  audio_set_volume(server_settings_message->volume);
 
   // Volume setting using ADF HAL
   // abstraction
@@ -1024,7 +1036,11 @@ int process_data(snapcast_protocol_parser_t *parser,
       if (parse_wire_chunk_message(parser, &base_message_rx, *codec, pcmData, &wire_chnk, &decoderChunk) != PARSER_OK) {
         return -1;
       }
+      int64_t trace_body_us = esp_timer_get_time();
+      int64_t trace_chunk_us = (int64_t)wire_chnk.timestamp.sec * 1000000LL + wire_chnk.timestamp.usec;
+      int64_t trace_header_us = (int64_t)base_message_rx.received.sec * 1000000LL + base_message_rx.received.usec;
       handle_chunk_message(*codec, scSet, pcmData, &wire_chnk);
+      cr2_trace(1, trace_chunk_us, trace_header_us, trace_body_us, wire_chnk.size);
       return 0;
     }
 
@@ -1079,10 +1095,17 @@ typedef struct
 {
   time_sync_data_t *time_sync_data;
   bool *received_codec_header;
+  snapcastSetting_t *setting;
 } before_receive_callback_data_t;
 
 
 void before_receive_callback(before_receive_callback_data_t *data) {
+  int ui_volume; bool ui_muted;
+  if (cr2_audio_take_control(&ui_volume, &ui_muted)) {
+    data->setting->volume = ui_volume; data->setting->muted = ui_muted;
+    audio_set_volume(ui_volume); audio_set_mute(ui_muted);
+    if (player_send_snapcast_setting(data->setting) != pdPASS) esp_restart();
+  }
   //unpack
   time_sync_data_t *time_sync_data = data->time_sync_data;
   bool received_codec_header = *data->received_codec_header;
@@ -1224,8 +1247,10 @@ static void http_get_task(void *pvParameters) {
     hello_message.protocol_version = 2;
 
     if (hello_message_serialized == NULL) {
-      hello_message_serialized = hello_message_serialize(
-          &hello_message, (size_t *)&(base_message_rx.size));
+      size_t hello_size = 0;
+      hello_message_serialized = hello_message_serialize(&hello_message, &hello_size);
+      if (hello_size > 1024) { free(hello_message_serialized); hello_message_serialized = NULL; }
+      base_message_rx.size = (uint32_t)hello_size;
       if (!hello_message_serialized) {
         ESP_LOGE(TAG, "Failed to serialize hello message");
         // critical error
@@ -1241,10 +1266,18 @@ static void http_get_task(void *pvParameters) {
       esp_restart();
     }
 
-    rc1 = netconn_write(lwipNetconn, base_message_serialized, BASE_MESSAGE_SIZE,
-                        NETCONN_NOCOPY);
-    rc1 |= netconn_write(lwipNetconn, hello_message_serialized,
-                        base_message_rx.size, NETCONN_NOCOPY);
+    size_t hello_packet_size = BASE_MESSAGE_SIZE + base_message_rx.size;
+    char *hello_packet = malloc(hello_packet_size);
+    rc1 = ERR_MEM;
+    if (hello_packet) {
+      memcpy(hello_packet, base_message_serialized, BASE_MESSAGE_SIZE);
+      memcpy(hello_packet + BASE_MESSAGE_SIZE, hello_message_serialized, base_message_rx.size);
+      rc1 = netconn_write(lwipNetconn, hello_packet, hello_packet_size, NETCONN_COPY);
+      free(hello_packet);
+    }
+    free(hello_message_serialized);
+    hello_message_serialized = NULL;
+    cr2_trace(9, hello_packet_size, base_message_rx.size, rc1, 0);
     if (rc1 != ERR_OK) {
       ESP_LOGE(TAG, "netconn failed to send hello message");
 
@@ -1273,6 +1306,7 @@ static void http_get_task(void *pvParameters) {
     before_receive_callback_data_t before_receive_callback_data;
     before_receive_callback_data.received_codec_header = &received_codec_header;
     before_receive_callback_data.time_sync_data = &time_sync_data;
+    before_receive_callback_data.setting = &scSet;
     connection.before_receive_callback = (void (*)(void *))before_receive_callback;
     connection.before_receive_callback_data = (void*) &before_receive_callback_data;
     connection.isMuted = &scSet.muted;
@@ -1298,6 +1332,8 @@ static void http_get_task(void *pvParameters) {
           process_data(&parser, &time_sync_data, &received_codec_header, &codec,
                        &scSet, &pcmData);
       if (result != 0) {
+        cr2_trace(10, result, 0, 0, 0);
+        cr2_audio_clock(false);
         break;  // restart connection
       }
     }
@@ -1345,6 +1381,7 @@ static void dac_control_task(audio_board_handle_t board_handle,
  *
  */
 void app_main(void) {
+  cr2_bench_early_init();
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
       ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -1544,8 +1581,7 @@ void app_main(void) {
   dsp_settings_init();   // Then settings can restore params into the processor
 #endif
 
-  xTaskCreatePinnedToCore(&ota_server_task, "ota", 14 * 256, NULL,
-                          OTA_TASK_PRIORITY, &t_ota_task, OTA_TASK_CORE_ID);
+  // Bench build: firmware replacement is via USB only; no OTA task.
 
   xTaskCreatePinnedToCore(&http_get_task, "http", 15 * 1024, NULL,
                           HTTP_TASK_PRIORITY, &t_http_get_task,

@@ -84,6 +84,12 @@ static SemaphoreHandle_t connIpSemaphoreHandle = NULL;
 static void event_handler(void *arg, esp_event_base_t event_base, int event_id,
                           void *event_data) {
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+    // User-requested driver maximum. IDF maps 80..84 to 20 dBm.
+    int8_t before, actual;
+    ESP_ERROR_CHECK(esp_wifi_get_max_tx_power(&before));
+    ESP_ERROR_CHECK(esp_wifi_set_max_tx_power(84));
+    ESP_ERROR_CHECK(esp_wifi_get_max_tx_power(&actual));
+    ESP_LOGI("CR2", "WIFI_RF tx_before_qdbm=%d tx_request_qdbm=84 tx_max_qdbm=%d", before, actual);
     esp_wifi_connect();
   } else if (event_base == WIFI_EVENT &&
              event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -108,6 +114,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int event_id,
  */
 static void improv_deinit_task(void *pv) {
   (void)pv;
+  // Leave provisioning available until the first successful connection.
+  wifi_ap_record_t ap;
+  while (esp_wifi_sta_get_ap_info(&ap) != ESP_OK) vTaskDelay(pdMS_TO_TICKS(1000));
   vTaskDelay(pdMS_TO_TICKS(IMPROV_DEINIT_DELAY_MS));
   ESP_LOGI(TAG, "Deinitiating improv provisioning (after %u ms)",
            (unsigned)IMPROV_DEINIT_DELAY_MS);
@@ -196,8 +205,8 @@ void wifi_start(void) {
   esp_wifi_netif = esp_netif_create_wifi(WIFI_IF_STA, &esp_netif_config);
   esp_wifi_set_default_wifi_sta_handlers();
 
-  // esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
-  //   esp_wifi_set_ps(WIFI_PS_NONE);
+  // USB-powered audio bench: avoid modem-sleep receive delays.
+  ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
 #if ENABLE_WIFI_PROVISIONING
   /* Start Wi-Fi station */

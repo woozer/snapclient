@@ -1,4 +1,6 @@
 #include "connection_handler.h"
+#include "cr2_trace.h"
+#include "esp_timer.h"
 
 #include "esp_log.h"
 #include "lwip/err.h"
@@ -12,6 +14,12 @@
 extern struct netconn* lwipNetconn;
 
 static const char* TAG = "CONNECTION_HANDLER";
+
+static void cr2_netconn_event(struct netconn *conn, enum netconn_evt evt, u16_t len) {
+  if (evt == NETCONN_EVT_RCVPLUS && len) {
+    cr2_trace(6, (uintptr_t)conn, len, xPortGetCoreID(), 0);
+  }
+}
 
 void setup_network(esp_netif_t** netif) {
   int rc1, rc2 = ERR_OK;
@@ -173,11 +181,11 @@ void setup_network(esp_netif_t** netif) {
     }
 
     if (remote_ip.type == IPADDR_TYPE_V4) {
-      lwipNetconn = netconn_new(NETCONN_TCP);
+      lwipNetconn = netconn_new_with_callback(NETCONN_TCP, cr2_netconn_event);
 
       ESP_LOGV(TAG, "netconn using IPv4");
     } else if (remote_ip.type == IPADDR_TYPE_V6) {
-      lwipNetconn = netconn_new(NETCONN_TCP_IPV6);
+      lwipNetconn = netconn_new_with_callback(NETCONN_TCP_IPV6, cr2_netconn_event);
 
       ESP_LOGV(TAG, "netconn using IPv6");
     } else {
@@ -260,7 +268,10 @@ static int receive_data(struct netbuf** firstNetBuf, bool isMuted,
     before_receive_callback(before_receive_callback_data);
 
     // start receive
+    int64_t trace_recv_start = esp_timer_get_time();
     int rc2 = netconn_recv(lwipNetconn, firstNetBuf);
+    cr2_trace(7, trace_recv_start, (uintptr_t)lwipNetconn,
+              rc2 == ERR_OK && *firstNetBuf ? netbuf_len(*firstNetBuf) : 0, rc2);
     if (rc2 != ERR_OK) {
       if (rc2 == ERR_CONN) {
         netconn_close(lwipNetconn);

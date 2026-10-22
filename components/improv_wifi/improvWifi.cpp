@@ -129,7 +129,7 @@ void ImprovWiFi::setDeviceInfo(ImprovTypes::ChipFamily chipFamily,
 
 bool ImprovWiFi::isConnected() {
   if (customIsConnectedCallback) {
-    customIsConnectedCallback();
+    return customIsConnectedCallback();
   }
 
   return 0;

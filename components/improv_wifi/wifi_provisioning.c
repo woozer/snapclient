@@ -151,7 +151,7 @@ void improv_wifi_scan(unsigned char *scanResponse, int bufLen,
   }
   ESP_LOGD(TAG, "Max AP number ap_info can hold = %u", number);
   ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
-  ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(count));
+  *count = number; // AP count returned by esp_wifi_scan_get_ap_records.
   ESP_LOGD(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", *count, number);
 
   scanResponse[0] = 0;
@@ -200,8 +200,13 @@ bool improv_wifi_connect(const char *ssid, const char *password) {
 
   wifi_config_t wifi_config;
   ESP_ERROR_CHECK(esp_wifi_get_config(WIFI_IF_STA, &wifi_config));
-  strcpy((char *)wifi_config.sta.ssid, ssid);
-  strcpy((char *)wifi_config.sta.password, password);
+  size_t ssid_len = strlen(ssid), password_len = strlen(password);
+  if (!ssid_len || ssid_len > sizeof(wifi_config.sta.ssid) ||
+      password_len > sizeof(wifi_config.sta.password)) return false;
+  memset(wifi_config.sta.ssid, 0, sizeof(wifi_config.sta.ssid));
+  memset(wifi_config.sta.password, 0, sizeof(wifi_config.sta.password));
+  memcpy(wifi_config.sta.ssid, ssid, ssid_len);
+  memcpy(wifi_config.sta.password, password, password_len);
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
 
   esp_wifi_connect();
@@ -280,7 +285,7 @@ void improv_init(void) {
   chipFamily = CF_ESP32;
 #endif
 
-  improv_wifi_set_device_info(chipFamily, "esp32_snapclient", "0.0.3",
+  improv_wifi_set_device_info(chipFamily, "speaker-cr2", "c-r2-play-0.2.20-wait",
                               "snapclient", (const char *)urlStr);
 
   improv_wifi_setCustomConnectWiFi(improv_wifi_connect);
