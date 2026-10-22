@@ -219,6 +219,11 @@ void wifi_start(void) {
 
   wifi_config_t wifi_config;
   ESP_ERROR_CHECK(esp_wifi_get_config(WIFI_IF_STA, &wifi_config));
+  /* Scan every channel before ranking matching APs. Fast scan ignores sort_method. */
+  wifi_config.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
+  wifi_config.sta.bssid_set = false;
+  memset(wifi_config.sta.bssid, 0, sizeof(wifi_config.sta.bssid));
+  wifi_config.sta.channel = 0;
   wifi_config.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
 
@@ -254,6 +259,9 @@ void wifi_start(void) {
           {
               .ssid = WIFI_SSID,
               .password = WIFI_PASSWORD,
+              .scan_method = WIFI_ALL_CHANNEL_SCAN,
+              .bssid_set = false,
+              .channel = 0,
               .sort_method = WIFI_CONNECT_AP_BY_SIGNAL,
               .threshold.authmode = WIFI_MIN_AUTHTYPE,
               .pmf_cfg = {.capable = true, .required = false},
