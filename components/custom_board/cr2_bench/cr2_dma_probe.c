@@ -15,6 +15,7 @@ static DRAM_ATTR cr2_dma_state_t state;
 static DRAM_ATTR portMUX_TYPE mux=portMUX_INITIALIZER_UNLOCKED;
 static DRAM_ATTR void *previous_buffer;
 static unsigned epochs, snapshots;
+static DRAM_ATTR uint32_t isr_gap_limit_us;
 static cr2_dma_inventory_t last;
 static cr2_wait_config_t tuning={.enabled=true,.cap_us=20000,.reserve_us=5000};
 
@@ -31,9 +32,8 @@ static bool IRAM_ATTR sent(i2s_chan_handle_t channel, i2s_event_data_t *event,
         if (gap>state.max_gap_us) state.max_gap_us=(uint32_t)gap;
         if (event->size!=state.block || event->dma_buf==previous_buffer)
             state.flags|=CR2_DMA_CALLBACK;
-        /* 48k stereo S16, 1023-frame descriptors: nominal 21312.5 us.
-         * No division/helper from the ISR; attach rejects other formats. */
-        if (gap>32000) state.flags|=CR2_DMA_EOF_GAP;
+        /* Limits calculated once at attach; no division in the ISR. */
+        if (gap>isr_gap_limit_us) state.flags|=CR2_DMA_EOF_GAP;
         state.completed+=event->size;
         state.eof_count++;
         state.eof_us=now;
@@ -65,9 +65,11 @@ void cr2_dma_probe_attach(i2s_chan_handle_t channel, uint32_t sr,
     memset(&state,0,sizeof(state));
     state.rate=sr*channels*(bits/8);
     state.capacity=info.total_dma_buf_size;
-    state.block=4092;
+    state.block=CR2_DMA_FRAMES*4;
+    uint32_t descriptor_us=cr2_dma_period_us(state.block,state.rate);
+    isr_gap_limit_us=(descriptor_us*3+1)/2;
     state.flags=(sr==48000 && bits==16 && channels==2 &&
-                 info.total_dma_buf_size==8184) ? 0 : CR2_DMA_CALLBACK;
+                 info.total_dma_buf_size==state.block*CR2_DMA_DESCRIPTORS) ? 0 : CR2_DMA_CALLBACK;
     portEXIT_CRITICAL(&mux);
     i2s_event_callbacks_t callbacks={.on_sent=sent, .on_send_q_ovf=overflow};
     ESP_ERROR_CHECK(i2s_channel_register_event_callback(channel,&callbacks,NULL));
@@ -78,7 +80,8 @@ void cr2_dma_probe_stop(void) {
     state.submitted=state.completed=0;
     state.start_us=state.eof_us=0;
     state.eof_count=state.overflows=state.max_gap_us=state.inflight=0;
-    state.flags=(state.rate==192000 && state.capacity==8184) ? 0 : CR2_DMA_CALLBACK;
+    state.flags=(state.rate==192000 && state.block==CR2_DMA_FRAMES*4 &&
+                 state.capacity==state.block*CR2_DMA_DESCRIPTORS) ? 0 : CR2_DMA_CALLBACK;
     previous_buffer=NULL;
     portEXIT_CRITICAL(&mux);
 }
@@ -113,7 +116,8 @@ uint32_t cr2_dma_probe_wait_budget(bool clock_error, int64_t *remaining_us) {
     portEXIT_CRITICAL(&mux);
     cr2_dma_inventory_t o=cr2_dma_inventory(&s,now);
     *remaining_us=o.estimate_us;
-    return cr2_wait_budget(o,s.max_gap_us,clock_error,config);
+    return cr2_wait_budget(o,s.max_gap_us,clock_error,config,
+                           cr2_dma_period_us(s.block,s.rate),1000000/configTICK_RATE_HZ);
 }
 void cr2_dma_probe_snapshot(int queue_count) {
     portENTER_CRITICAL(&mux);
@@ -165,10 +169,11 @@ static esp_err_t tuning_status(httpd_req_t *req) {
         "{\"enabled\":%s,\"max_wait_ms\":%u,\"reserve_ms\":%u,"
         "\"persistent\":false,\"requires_disarmed\":true,"
         "\"limits\":{\"max_wait_ms\":[1,40],\"reserve_ms\":[3,15]},"
-        "\"read_only\":{\"dma_frames\":1023,\"dma_descriptors\":2,"
+        "\"read_only\":{\"dma_frames\":%u,\"dma_descriptors\":%u,"
         "\"dma_geometry_mutable\":false,\"snapcast_buffer_owner\":\"server\","
         "\"tcp_window_bytes\":32768,\"tcp_mailbox\":32}}",
-        c.enabled?"true":"false",(unsigned)c.cap_us/1000,(unsigned)c.reserve_us/1000);
+        c.enabled?"true":"false",(unsigned)c.cap_us/1000,(unsigned)c.reserve_us/1000,
+        (unsigned)CR2_DMA_FRAMES,(unsigned)CR2_DMA_DESCRIPTORS);
     if (n<0 || (size_t)n>=sizeof(out)) return ESP_FAIL;
     httpd_resp_set_type(req,"application/json");
     httpd_resp_set_hdr(req,"Cache-Control","no-store");

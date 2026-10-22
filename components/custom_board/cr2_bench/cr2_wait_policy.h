@@ -1,5 +1,6 @@
 #pragma once
 #include "cr2_dma_core.h"
+#include "cr2_dma_geometry.h"
 
 typedef struct {
     bool enabled;
@@ -17,11 +18,13 @@ static inline bool cr2_wait_config_valid(cr2_wait_config_t c) {
  */
 static inline uint32_t cr2_wait_budget(cr2_dma_inventory_t inventory,
                                      uint32_t max_eof_gap_us,
-                                     bool clock_error, cr2_wait_config_t config) {
+                                     bool clock_error, cr2_wait_config_t config,
+                                     uint32_t descriptor_us, uint32_t tick_us) {
     if (!config.enabled || !cr2_wait_config_valid(config) ||
         clock_error || inventory.flags || inventory.estimate_us<=config.reserve_us ||
-        inventory.since_eof_us<0 || inventory.since_eof_us>21313 ||
-        max_eof_gap_us>22313) return 0;
+        !descriptor_us || !tick_us ||
+        inventory.since_eof_us<0 || inventory.since_eof_us>descriptor_us ||
+        max_eof_gap_us>descriptor_us+tick_us) return 0;
     int64_t available=inventory.estimate_us-config.reserve_us;
     return available>config.cap_us ? config.cap_us : (uint32_t)available;
 }
