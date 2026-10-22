@@ -85,7 +85,7 @@ static void error_callback(const FLAC__StreamDecoder *decoder,
 
 static FLAC__StreamDecoder *flacDecoder = NULL;
 
-const char *VERSION_STRING = "c-r2-play-0.2.24-s240";
+const char *VERSION_STRING = "c-r2-play-0.2.26-retry";
 
 #define HTTP_TASK_PRIORITY 17
 #define HTTP_TASK_CORE_ID 1

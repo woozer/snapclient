@@ -291,7 +291,7 @@ static esp_err_t http_status(httpd_req_t *req) {
     int f0=atomic_load(&bq_fault0),f1=atomic_load(&bq_fault1);
     valid=valid && !(seq&1) && seq==atomic_load(&power_sequence);
     unsigned age=now_ms()-sample;
-    snprintf(out,sizeof(out),"{\"firmware\":\"c-r2-play-0.2.24-s240\",\"playback_variant\":\"block240-bounded-dma-wait\",\"dma_monitor_enabled\":false,\"armed\":%s,\"amp\":%d,\"charge\":%d,\"playing\":%s,\"fault\":%s,\"clock\":%s,\"format_ok\":%s,\"volume\":%d,\"muted\":%s,\"vbus_mv\":%d,\"sys_mv\":%d,\"ibus_ma\":%d,\"rssi_dbm\":%d,\"resyncs\":%u,\"resync_age_ms\":%u,\"empty_waits\":%u,\"dma_underruns\":%u,\"power_valid\":%s,\"power_fresh\":%s,\"power_sequence\":%u,\"power_age_ms\":%d,\"selector\":%d,\"power_profile\":\"%s\",\"digital_ceiling_db\":%.1f,\"vbat_mv\":%d,\"die_half_c\":%d,\"bq_fault0\":%d,\"bq_fault1\":%d,\"ota_available\":true,\"ota_active\":%s,\"ota_slot\":\"%s\",\"uptime_ms\":%u}",
+    snprintf(out,sizeof(out),"{\"firmware\":\"c-r2-play-0.2.26-retry\",\"playback_variant\":\"block240-bounded-dma-wait\",\"dma_monitor_enabled\":false,\"armed\":%s,\"amp\":%d,\"charge\":%d,\"playing\":%s,\"fault\":%s,\"clock\":%s,\"format_ok\":%s,\"volume\":%d,\"muted\":%s,\"vbus_mv\":%d,\"sys_mv\":%d,\"ibus_ma\":%d,\"rssi_dbm\":%d,\"resyncs\":%u,\"resync_age_ms\":%u,\"empty_waits\":%u,\"dma_underruns\":%u,\"power_valid\":%s,\"power_fresh\":%s,\"power_sequence\":%u,\"power_age_ms\":%d,\"selector\":%d,\"power_profile\":\"%s\",\"digital_ceiling_db\":%.1f,\"vbat_mv\":%d,\"die_half_c\":%d,\"bq_fault0\":%d,\"bq_fault1\":%d,\"ota_available\":true,\"ota_active\":%s,\"ota_slot\":\"%s\",\"uptime_ms\":%u}",
         armed()?"true":"false",gpio_get_level(PDN),gpio_get_level(CHARGE),atomic_load(&playing)?"true":"false",atomic_load(&faulted)?"true":"false",atomic_load(&clock_on)?"true":"false",atomic_load(&format_ok)?"true":"false",atomic_load(&volume_value),atomic_load(&muted)?"true":"false",vb,vs,ib,atomic_load(&last_rssi),atomic_load(&resyncs),(unsigned)(now_ms()-atomic_load(&last_resync)),atomic_load(&empty_waits),atomic_load(&underruns),valid?"true":"false",(valid&&age<=3000)?"true":"false",seq,sample?(int)age:-1,gpio_get_level(SELECTOR),cr2_profile_name(atomic_load(&power_profile)),atomic_load(&ui_session)?24.0-0.5*atomic_load(&ui_ceiling):cr2_ceiling_db(atomic_load(&power_profile)),bat,die,f0,f1,atomic_load(&update_active)?"true":"false",cr2_ota_running_slot(),(unsigned)now_ms());
     size_t used=strlen(out);
     unsigned lo=atomic_load(&bssid_lo),hi=atomic_load(&bssid_hi),cv=atomic_load(&control_value);
@@ -468,7 +468,7 @@ void cr2_bench_early_init(void) {
     ESP_ERROR_CHECK(gpio_hold_en(CHARGE));gpio_set_direction(SELECTOR,GPIO_MODE_INPUT);gpio_set_direction(INPUT_SELECT,GPIO_MODE_INPUT);
     if(esp_psram_get_size()!=8*1024*1024)abort();
     cr2_trace_init();
-    ESP_LOGI(TAG,"c-r2-play-0.2.24-s240 bootDISARMED ampOFF chargeLOW, USB/dock/battery caps, authenticated OTA, no PD requests");
+    ESP_LOGI(TAG,"c-r2-play-0.2.26-retry bootDISARMED ampOFF chargeLOW, USB/dock/battery caps, authenticated OTA, no PD requests");
 }
 static esp_err_t init(audio_hal_codec_config_t *cfg) {
     (void)cfg;off();
