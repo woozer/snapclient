@@ -1,0 +1,270 @@
+{
+  "status": "50_MS_NOT_QUALIFIED",
+  "runs": [
+    {
+      "firmware": "c-r2-play-0.2.26-retry",
+      "buffer_ms": 100,
+      "dma_frames": 240,
+      "elapsed_s": 20.361890827072784,
+      "resync_delta": 0,
+      "rssi_range": [
+        -46,
+        -45
+      ],
+      "clock_samples": 36,
+      "samples": 36,
+      "window_event_counts": {
+        "6": 871,
+        "7": 871,
+        "1": 851,
+        "2": 20,
+        "8": 20
+      },
+      "startup_attempts_total": 1,
+      "startup_abort_reasons_total": {},
+      "startup_abort_reasons_window": {},
+      "i2s_enable_calls_total": 1,
+      "successful_starts_total": 1,
+      "enable_api_lateness_us": {
+        "min": 86,
+        "median": 86,
+        "max": 86
+      },
+      "new_trace5_lateness_range_us": [
+        86,
+        86
+      ],
+      "capture_drops": 0,
+      "input_capture_drops": 0,
+      "physical_output_delay": "NOT_MEASURED",
+      "amp_charge_off": true,
+      "restored100": true,
+      "source_errors": [],
+      "transport": "flac",
+      "name": "retry240-flac100-073417"
+    },
+    {
+      "firmware": "c-r2-play-0.2.26-retry",
+      "buffer_ms": 50,
+      "dma_frames": 240,
+      "elapsed_s": 60.282894705887884,
+      "resync_delta": 765,
+      "rssi_range": [
+        -46,
+        -45
+      ],
+      "clock_samples": 87,
+      "samples": 107,
+      "window_event_counts": {
+        "6": 2572,
+        "7": 2572,
+        "1": 2513,
+        "15": 930,
+        "16": 930,
+        "21": 930,
+        "11": 599,
+        "12": 599,
+        "13": 599,
+        "14": 599,
+        "4": 599,
+        "17": 628,
+        "18": 628,
+        "19": 599,
+        "5": 599,
+        "20": 29,
+        "2": 59,
+        "8": 59,
+        "3": 137
+      },
+      "startup_attempts_total": 717,
+      "startup_abort_reasons_total": {
+        "1": 31
+      },
+      "startup_abort_reasons_window": {
+        "1": 29
+      },
+      "i2s_enable_calls_total": 686,
+      "successful_starts_total": 686,
+      "enable_api_lateness_us": {
+        "min": 65,
+        "median": 67.0,
+        "max": 109
+      },
+      "new_trace5_lateness_range_us": [
+        65,
+        109
+      ],
+      "capture_drops": 0,
+      "input_capture_drops": 0,
+      "physical_output_delay": "NOT_MEASURED",
+      "amp_charge_off": true,
+      "restored100": true,
+      "source_errors": [],
+      "transport": "flac",
+      "name": "retry240-flac50-073614",
+      "retry-analysis": {
+        "waits": 930,
+        "calls": {
+          "2": 473,
+          "1": 457
+        },
+        "reasons": {
+          "2": 517,
+          "1": 410,
+          "3": 3
+        },
+        "retried": 473,
+        "retry_success": 25
+      },
+      "delivery-analysis": {
+        "window_us": [
+          12720000,
+          73047000
+        ],
+        "chunks": 2513,
+        "callback_to_return_ms": {
+          "min": 0.055,
+          "median": 0.163,
+          "p99": 0.475,
+          "max": 2.42
+        },
+        "callback_gap_ms": {
+          "min": 0.037,
+          "median": 20.0235,
+          "p99": 45.905,
+          "max": 64.868
+        },
+        "server_send_gap_ms": {
+          "min": 19.53186,
+          "median": 20.015706,
+          "p99": 40.09561,
+          "max": 40.315415
+        },
+        "handler_ms": {
+          "min": 1.012,
+          "median": 1.081,
+          "p99": 2.033,
+          "max": 2.444
+        },
+        "relative_delivery_ms": {
+          "min": -0.40771484375,
+          "median": 0.0,
+          "p99": 20.682861328125,
+          "max": 58.582763671875
+        },
+        "limits": "Exact measured window. Relative lag is median-normalized across different clock origins, no drift fit; not absolute one-way latency. Callback follows lwIP mailbox post, not radio arrival."
+      }
+    },
+    {
+      "firmware": "c-r2-play-0.2.26-retry",
+      "buffer_ms": 50,
+      "dma_frames": 240,
+      "elapsed_s": 60.20408885600045,
+      "resync_delta": 13,
+      "rssi_range": [
+        -46,
+        -45
+      ],
+      "clock_samples": 107,
+      "samples": 107,
+      "window_event_counts": {
+        "6": 12108,
+        "7": 12108,
+        "1": 6024,
+        "15": 7,
+        "16": 7,
+        "21": 7,
+        "11": 6,
+        "12": 6,
+        "13": 6,
+        "14": 6,
+        "4": 6,
+        "17": 6,
+        "18": 6,
+        "19": 6,
+        "5": 6,
+        "8": 59,
+        "2": 60,
+        "3": 7
+      },
+      "startup_attempts_total": 11,
+      "startup_abort_reasons_total": {
+        "1": 1
+      },
+      "startup_abort_reasons_window": {},
+      "i2s_enable_calls_total": 10,
+      "successful_starts_total": 10,
+      "enable_api_lateness_us": {
+        "min": 66,
+        "median": 76.0,
+        "max": 84
+      },
+      "new_trace5_lateness_range_us": [
+        66,
+        84
+      ],
+      "capture_drops": 0,
+      "input_capture_drops": 0,
+      "physical_output_delay": "NOT_MEASURED",
+      "amp_charge_off": true,
+      "restored100": true,
+      "source_errors": [],
+      "transport": "pcm10",
+      "name": "retry240-pcm10-reserve3-50-073812",
+      "retry-analysis": {
+        "waits": 7,
+        "calls": {
+          "1": 4,
+          "2": 3
+        },
+        "reasons": {
+          "3": 2,
+          "2": 3,
+          "1": 2
+        },
+        "retried": 3,
+        "retry_success": 0
+      },
+      "delivery-analysis": {
+        "window_us": [
+          12775000,
+          73022000
+        ],
+        "chunks": 6024,
+        "callback_to_return_ms": {
+          "min": 0.07,
+          "median": 0.638,
+          "p99": 1.279,
+          "max": 5.162
+        },
+        "callback_gap_ms": {
+          "min": 0.023,
+          "median": 0.258,
+          "p99": 18.04,
+          "max": 57.517
+        },
+        "server_send_gap_ms": {
+          "min": 9.454207,
+          "median": 10.002881,
+          "p99": 10.281017,
+          "max": 10.472067
+        },
+        "handler_ms": {
+          "min": 0.01,
+          "median": 0.024,
+          "p99": 0.034,
+          "max": 0.252
+        },
+        "relative_delivery_ms": {
+          "min": -0.298828125,
+          "median": 0.0,
+          "p99": 18.350341796875,
+          "max": 48.28271484375
+        },
+        "limits": "Exact measured window. Relative lag is median-normalized across different clock origins, no drift fit; not absolute one-way latency. Callback follows lwIP mailbox post, not radio arrival."
+      }
+    }
+  ],
+  "reference_restored": "c-r2-play-0.2.20-wait;100ms;DMA2x1023;wait20/reserve5;muted;chargeOFF",
+  "scope": "Silent transport tests; API timing is not physical output timing."
+}

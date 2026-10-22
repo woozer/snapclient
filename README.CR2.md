@@ -62,3 +62,12 @@ end-to-end lip-sync. Software queue and DMA capacities overlap that target;
 do not sum their maximum capacities as independent delays. I2S API timestamps
 are not measured physical LRCLK or acoustic output. Keep the working reference
 for comparison and read `cr2/50ms-feasibility.md` on the experimental branch.
+
+## Experimental branch verification
+
+This branch currently exports `c-r2-play-0.2.29-ap480`, DMA 2×480 with
+strongest-AP selection. Run `python3 cr2/tests/run.py` for source-matched host
+tests with AddressSanitizer/UndefinedBehaviorSanitizer. The original working
+100 ms branch is preserved separately. See `cr2/50ms-feasibility.md` and its
+sanitized measurements: five resyncs in the latest one-minute 50 ms trial.
+The deployed board was restored to `cr2/best-ap-100ms`.

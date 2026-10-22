@@ -1,0 +1,181 @@
+{
+  "result": "50ms_NOT_QUALIFIED",
+  "silent": true,
+  "trials": [
+    {
+      "firmware": "c-r2-play-0.2.29-ap480",
+      "buffer_ms": 100,
+      "dma_frames": 480,
+      "elapsed_s": 20.361938308924437,
+      "resync_delta": 0,
+      "rssi_range": [
+        -43,
+        -43
+      ],
+      "clock_samples": 36,
+      "samples": 36,
+      "window_event_counts": {
+        "6": 4113,
+        "7": 4113,
+        "1": 2046,
+        "2": 21,
+        "8": 20
+      },
+      "startup_attempts_total": 1,
+      "startup_abort_reasons_total": {},
+      "startup_abort_reasons_window": {},
+      "i2s_enable_calls_total": 1,
+      "successful_starts_total": 1,
+      "enable_api_lateness_us": {
+        "min": 99,
+        "median": 99,
+        "max": 99
+      },
+      "new_trace5_lateness_range_us": [
+        99,
+        99
+      ],
+      "capture_drops": 0,
+      "input_capture_drops": 0,
+      "physical_output_delay": "NOT_MEASURED",
+      "amp_charge_off": true,
+      "restored100": true,
+      "source_errors": [],
+      "same_ap_required_and_verified": true,
+      "codec": "pcm",
+      "verified_chunk_ms": 10,
+      "camilla_frames": 512,
+      "reserve_ms": 3
+    },
+    {
+      "firmware": "c-r2-play-0.2.29-ap480",
+      "buffer_ms": 50,
+      "dma_frames": 480,
+      "elapsed_s": 60.21587054990232,
+      "resync_delta": 5,
+      "rssi_range": [
+        -44,
+        -43
+      ],
+      "clock_samples": 106,
+      "samples": 107,
+      "window_event_counts": {
+        "6": 12110,
+        "7": 12110,
+        "1": 6025,
+        "8": 59,
+        "2": 60,
+        "15": 29,
+        "16": 29,
+        "21": 29,
+        "11": 3,
+        "12": 3,
+        "13": 3,
+        "14": 3,
+        "4": 3,
+        "3": 2,
+        "17": 3,
+        "18": 3,
+        "19": 3,
+        "5": 3
+      },
+      "startup_attempts_total": 4,
+      "startup_abort_reasons_total": {},
+      "startup_abort_reasons_window": {},
+      "i2s_enable_calls_total": 4,
+      "successful_starts_total": 4,
+      "enable_api_lateness_us": {
+        "min": 69,
+        "median": 76.5,
+        "max": 88
+      },
+      "new_trace5_lateness_range_us": [
+        69,
+        88
+      ],
+      "capture_drops": 0,
+      "input_capture_drops": 0,
+      "physical_output_delay": "NOT_MEASURED",
+      "amp_charge_off": true,
+      "restored100": true,
+      "source_errors": [],
+      "same_ap_required_and_verified": true,
+      "codec": "pcm",
+      "verified_chunk_ms": 10,
+      "camilla_frames": 512,
+      "reserve_ms": 3
+    }
+  ],
+  "delivery": {
+    "chunks": 6025,
+    "callback_to_return_ms": {
+      "min": 0.057,
+      "median": 0.639,
+      "p99": 1.122,
+      "max": 4.787
+    },
+    "callback_gap_ms": {
+      "min": 0.024,
+      "median": 0.4655,
+      "p99": 16.97,
+      "max": 49.577
+    },
+    "receiver_body_ms": {
+      "min": 0.619,
+      "median": 0.685,
+      "p99": 1.023,
+      "max": 1.754
+    },
+    "handler_ms": {
+      "min": 0.009,
+      "median": 0.022,
+      "p99": 0.034,
+      "max": 0.355
+    },
+    "server_send_gap_ms": {
+      "min": 9.536462,
+      "median": 10.003244,
+      "p99": 10.301305,
+      "max": 10.612935
+    },
+    "relative_delivery_ms": {
+      "min": -0.354736328125,
+      "median": 0.0,
+      "p99": 14.7392578125,
+      "max": 40.59423828125
+    },
+    "tcp": {
+      "repeated_tcp_segments": 0,
+      "raw_advertised_window": {
+        "min": 24418,
+        "median": 30810,
+        "p99": 32768,
+        "max": 32768
+      },
+      "zero_window_packets": 0,
+      "ack_progress_gap_ms": {
+        "min": 6e-05,
+        "median": 9.985124,
+        "p99": 23.611156,
+        "max": 52.459824
+      },
+      "repeats": [],
+      "scope": "Repeated TCP sequence ranges in server Ethernet capture. Does not distinguish RF data/ACK loss, ESP receive delay or spurious retransmission."
+    },
+    "limits": "Exact measured window. Relative lag is median-normalized across different clock origins, no drift fit; not absolute one-way latency. Callback follows lwIP mailbox post, not radio arrival."
+  },
+  "restored": {
+    "firmware": "c-r2-play-0.2.28-ap100",
+    "dma_frames": 1023,
+    "server_buffer_ms": 100,
+    "codec": "flac",
+    "camilla_frames": 512,
+    "amp_charge_off": true,
+    "strongest_ap_selection": true
+  },
+  "limits": [
+    "Short sequential trials, no audible or physical output-delay test",
+    "Strong RSSI does not measure airtime or isolate AP/radio/lwIP scheduling",
+    "Partial-active DMA flag means continuity unknown; not proof of exact analogue dropout"
+  ]
+}

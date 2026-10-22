@@ -285,7 +285,7 @@ void improv_init(void) {
   chipFamily = CF_ESP32;
 #endif
 
-  improv_wifi_set_device_info(chipFamily, "speaker-cr2", "c-r2-play-0.2.26-retry",
+  improv_wifi_set_device_info(chipFamily, "speaker-cr2", "c-r2-play-0.2.29-ap480",
                               "snapclient", (const char *)urlStr);
 
   improv_wifi_setCustomConnectWiFi(improv_wifi_connect);

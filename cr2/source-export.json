@@ -1,10 +1,10 @@
 {
   "upstream_commit": "f13a7e437824ab7ef7bd4bfe482fcfeea8e74dbd",
-  "source_version": "c-r2-play-0.2.26-retry",
+  "source_version": "c-r2-play-0.2.29-ap480",
   "exported_files": {
     "CMakeLists.txt": {
-      "source_sha256": "d80d4f0d9063e7e1ad315800c3ffb108dc496eb07f3caf007695497ee0b02a66",
-      "public_sha256": "d80d4f0d9063e7e1ad315800c3ffb108dc496eb07f3caf007695497ee0b02a66",
+      "source_sha256": "d670bfa479ff3cad72f2aea9c32ed96fc84199312539d5ae583f4f83236c3e88",
+      "public_sha256": "d670bfa479ff3cad72f2aea9c32ed96fc84199312539d5ae583f4f83236c3e88",
       "sanitized": false
     },
     "components/audio_board/Kconfig.projbuild": {
@@ -33,8 +33,8 @@
       "sanitized": false
     },
     "components/improv_wifi/wifi_provisioning.c": {
-      "source_sha256": "55b63378163db5acf7afbc867eebec4655a5f266ff17726e6efc8252d90838fe",
-      "public_sha256": "55b63378163db5acf7afbc867eebec4655a5f266ff17726e6efc8252d90838fe",
+      "source_sha256": "bebe33b2ae79c4ce5df06fb3265582ab4040b3f799c6612f8f8a2e4d467dd8e4",
+      "public_sha256": "bebe33b2ae79c4ce5df06fb3265582ab4040b3f799c6612f8f8a2e4d467dd8e4",
       "sanitized": false
     },
     "components/lightsnapcast/CMakeLists.txt": {
@@ -48,8 +48,8 @@
       "sanitized": false
     },
     "components/network_interface/wifi_interface.c": {
-      "source_sha256": "60dcdc1b0e8f0bd6b57ded19db413ee84cd244afc17584c828594bb95b039fc9",
-      "public_sha256": "60dcdc1b0e8f0bd6b57ded19db413ee84cd244afc17584c828594bb95b039fc9",
+      "source_sha256": "889fe0c758ca051d3b866cfef71306ce51c9d8f562dbbaff919213c329a6dad9",
+      "public_sha256": "889fe0c758ca051d3b866cfef71306ce51c9d8f562dbbaff919213c329a6dad9",
       "sanitized": false
     },
     "components/ui_http_server/ui_http_server.c": {
@@ -63,8 +63,8 @@
       "sanitized": false
     },
     "main/main.c": {
-      "source_sha256": "6867f94d2bea244e49e09d20b985a4e3342b4ba124b4864ed2475ed6527a02a0",
-      "public_sha256": "6867f94d2bea244e49e09d20b985a4e3342b4ba124b4864ed2475ed6527a02a0",
+      "source_sha256": "d144c6cf20d02fc22bee41515d1b3fc31f461fa73b3bf68d5c904c525342d2d0",
+      "public_sha256": "d144c6cf20d02fc22bee41515d1b3fc31f461fa73b3bf68d5c904c525342d2d0",
       "sanitized": false
     },
     "partitions.csv": {
@@ -78,8 +78,8 @@
       "sanitized": true
     },
     "components/custom_board/cr2_bench/cr2_dma_geometry.h": {
-      "source_sha256": "8b6aea1608c8153581fec8cf43edb4ba875db8aaec5acae85eb55021a2d99615",
-      "public_sha256": "8b6aea1608c8153581fec8cf43edb4ba875db8aaec5acae85eb55021a2d99615",
+      "source_sha256": "ea408fbaa37485458a7a2dd53e4400839a0e1e438a0551dd5f44ed7a1087a905",
+      "public_sha256": "ea408fbaa37485458a7a2dd53e4400839a0e1e438a0551dd5f44ed7a1087a905",
       "sanitized": false
     },
     "components/custom_board/cr2_bench/cr2_wait_policy.h": {
@@ -98,8 +98,8 @@
       "sanitized": false
     },
     "components/custom_board/cr2_bench/cr2_bench.c": {
-      "source_sha256": "4335343dd18bedc9ee786e0153057eae4d6580e07bd85d79e58fd68d1c04bf60",
-      "public_sha256": "4335343dd18bedc9ee786e0153057eae4d6580e07bd85d79e58fd68d1c04bf60",
+      "source_sha256": "5ee15054e77133fb45d9c17cf2e764e02b31bf5b425552518862e794316257a3",
+      "public_sha256": "5ee15054e77133fb45d9c17cf2e764e02b31bf5b425552518862e794316257a3",
       "sanitized": false
     },
     "components/custom_board/cr2_bench/cr2_dma_core.h": {
